@@ -13,8 +13,7 @@
         "./public/*"
     ],
     "env": {
-        "NODE_ENV": "development",
-        "SESSION_SECRET": "kjahkduyfiuxyfiubyIUYIUydiuydiuyi1u23iuy"
+        "NODE_ENV": "development"
     },
     "ext": "js,json,pug,css"
 }
