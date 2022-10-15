@@ -7,6 +7,7 @@ const fccTesting = require("./freeCodeCamp/fcctesting.js");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const bcrypt = require("bcrypt");
 
 const app = express();
 app.set("view engine", "pug");
@@ -26,6 +27,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 myDB(async (client) => {
   const myDataBase = await client.db("database").collection("users");
+
   passport.use(
     new LocalStrategy(function (username, password, done) {
       myDataBase.findOne({ username: username }, function (err, user) {
@@ -36,7 +38,7 @@ myDB(async (client) => {
         if (!user) {
           return done(null, false);
         }
-        if (password !== user.password) {
+        if (!bcrypt.compareSync(password, user.password)) {
           return done(null, false);
         }
         return done(null, user);
@@ -60,6 +62,7 @@ myDB(async (client) => {
   });
   app.route("/register").post(
     (req, res, next) => {
+      const hash = bcrypt.hashSync(req.body.password, 12);
       myDataBase.findOne({ username: req.body.username }, function (err, user) {
         if (err) {
           next(err);
@@ -69,7 +72,7 @@ myDB(async (client) => {
           myDataBase.insertOne(
             {
               username: req.body.username,
-              password: req.body.password,
+              password: hash,
             },
             (err, doc) => {
               if (err) {
