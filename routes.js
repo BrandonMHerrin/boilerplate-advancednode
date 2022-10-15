@@ -15,8 +15,18 @@ module.exports = function (app, myDataBase) {
       message: "Please login",
       showLogin: true,
       showRegistration: true,
+      showSocialAuth: true,
     });
   });
+  app.route("/auth/github").get(passport.authenticate("github"));
+  app
+    .route("/auth/github/callback")
+    .get(
+      passport.authenticate("github", { failureRedirect: "/" }),
+      (req, res, next) => {
+        res.redirect("/profile");
+      }
+    );
   app.route("/register").post(
     (req, res, next) => {
       const hash = bcrypt.hashSync(req.body.password, 12);
