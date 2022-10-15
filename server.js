@@ -33,10 +33,14 @@ myDB(async client => {
   passport.deserializeUser((id, done) => {
     myDataBase.findOne({_id: new ObjectID(id)}, (err, doc) => {
       done(null, doc);
-    })
+    });
     // done(null, null);
   });
-})
+}).catch(err => {
+  app.route('/').get((req, res) => {
+    res.render('pug', {title: err, message: 'Unable to login'});
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
