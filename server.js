@@ -1,6 +1,6 @@
 "use strict";
 require("dotenv").config();
-require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 const express = require("express");
 const myDB = require("./connection");
 const fccTesting = require("./freeCodeCamp/fcctesting.js");
@@ -55,8 +55,38 @@ myDB(async (client) => {
       title: "Connected to Database",
       message: "Please login",
       showLogin: true,
+      showRegistration: true,
     });
   });
+  app.route("/register").post(
+    (req, res, next) => {
+      myDataBase.findOne({ username: req.body.username }, function (err, user) {
+        if (err) {
+          next(err);
+        } else if (user) {
+          res.redirect("/");
+        } else {
+          myDataBase.insertOne(
+            {
+              username: req.body.username,
+              password: req.body.password,
+            },
+            (err, doc) => {
+              if (err) {
+                res.redirect("/");
+              } else {
+                next(null, doc.ops[0]);
+              }
+            }
+          );
+        }
+      });
+    },
+    passport.authenticate("local", { failureRedirect: "/" }),
+    (req, res, next) => {
+      res.redirect("/profile");
+    }
+  );
   app.route("/login").post(
     passport.authenticate("local", {
       failureRedirect: "/",
@@ -81,7 +111,7 @@ myDB(async (client) => {
     done(null, user._id);
   });
   passport.deserializeUser((id, done) => {
-    myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
+    myDataBase.findOne({ _id: new ObjectId(id) }, (err, doc) => {
       done(null, doc);
     });
   });
