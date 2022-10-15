@@ -65,8 +65,17 @@ myDB(async (client) => {
       res.redirect("/profile");
     }
   );
+  app.route("/logout").get((req, res) => {
+    req.logout({}, (err) => {
+      res.redirect("/");
+    });
+  });
   app.route("/profile").get(ensureAuthenticated, (req, res) => {
     res.render("./pug/profile", { username: req.user.username });
+  });
+
+  app.use((req, res, next) => {
+    res.status(404).type("text").send("Not Found");
   });
   passport.serializeUser((user, done) => {
     done(null, user._id);
