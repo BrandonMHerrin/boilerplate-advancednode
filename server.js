@@ -10,6 +10,8 @@ const routes = require("./routes");
 const auth = require("./auth");
 
 const app = express();
+const http = require("http").createServer(app);
+const io = require("socket.io")(http);
 app.set("view engine", "pug");
 fccTesting(app); //For FCC testing purposes
 app.use("/public", express.static(process.cwd() + "/public"));
@@ -29,6 +31,9 @@ myDB(async (client) => {
   const myDataBase = await client.db("database").collection("users");
   routes(app, myDataBase);
   auth(app, myDataBase);
+  io.on("connection", (socket) => {
+    console.log("A user has connected");
+  });
   app.use((req, res, next) => {
     res.status(404).type("text").send("Not Found");
   });
@@ -39,6 +44,6 @@ myDB(async (client) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+http.listen(PORT, () => {
   console.log("Listening on port " + PORT);
 });
