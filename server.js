@@ -31,8 +31,11 @@ myDB(async (client) => {
   const myDataBase = await client.db("database").collection("users");
   routes(app, myDataBase);
   auth(app, myDataBase);
+  let currentUsers = 0;
   io.on("connection", (socket) => {
     console.log("A user has connected");
+    ++currentUsers;
+    io.emit("user count", currentUsers);
   });
   app.use((req, res, next) => {
     res.status(404).type("text").send("Not Found");
